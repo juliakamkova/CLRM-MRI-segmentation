@@ -1,0 +1,190 @@
+checkpoint:
+  mode: min
+  monitor: 'val_loss'
+  save_top_k: 3
+  verbose: true
+data:
+  image: /path/to/dataset/img
+  label: /path/to/dataset/seg
+  root_dir: /path/to/dataset/
+  num_class: 3
+
+lightning:
+  accumulate_grad_batches: 1
+  fast_dev_run: false
+  gpus: 1
+  gradient_clip_val: 0
+  log_every_n_steps: 1
+  max_epochs: 100
+  num_sanity_val_steps: 1
+
+log:
+  name: # Name of the run
+  save_dir: RESULTS
+
+loss:
+  monai.losses.DiceCELoss:
+    args: []
+    kwargs:
+      softmax: True
+      to_onehot_y: num_classes
+
+net:
+  networks.dedc_net.VGGResYNetED3D:
+    args: []
+    kwargs:
+      n_classes: 3
+
+optimizer:
+  torch.optim.AdamW:
+    args: []
+    kwargs:
+      lr: 0.0001
+      weight_decay: 0.001
+
+train:
+  augmentation:
+  - monai.transforms.LoadImaged:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+  - monai.transforms.AddChanneld:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+  - monai.transforms.SpacingD:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+        mode:
+        - bilinear
+        - nearest
+        pixdim:
+        - 1.0
+        - 1.0
+        - 2.0
+  - monai.transforms.Orientationd:
+      args: []
+      kwargs:
+        keys: ["image", "label"]
+        axcodes: "RAS"
+  - monai.transforms.ScaleIntensityRanged:
+      args: []
+      kwargs:
+        keys: ["image"]
+        a_min: 0
+        a_max: 2000
+        b_min: 0.0
+        b_max: 1.0
+        clip: True
+  - monai.transforms.SpatialPadd:
+      args: []
+      kwargs:
+        keys: ["image", "label"]
+        spatial_size: [256, 256, 128]
+  - monai.transforms.RandFlipd:
+      args: []
+      kwargs:
+        keys: ["image", "label"]
+        spatial_axis: [0]
+        prob: 0.20
+  - monai.transforms.RandRotate90d:
+      args: []
+      kwargs:
+        keys: ["image", "label"]
+        prob: 0.20
+        max_k: 3
+  - monai.transforms.ToTensorD:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+
+valid:
+  augmentation:
+  - monai.transforms.LoadImaged:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+  - monai.transforms.AddChanneld:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+  - monai.transforms.SpacingD:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+        mode:
+        - bilinear
+        - nearest
+        pixdim:
+        - 1.0
+        - 1.0
+        - 2.0
+  - monai.transforms.Orientationd:
+      args: []
+      kwargs:
+        keys: ["image", "label"]
+        axcodes: "RAS"
+  - monai.transforms.ScaleIntensityRanged:
+      args: []
+      kwargs:
+        keys: ["image"]
+        a_min: 0
+        a_max: 2000
+        b_min: 0.0
+        b_max: 1.0
+        clip: True
+  - monai.transforms.ToTensorD:
+      args: []
+      kwargs:
+        keys:
+        - image
+        - label
+
+inference:
+  augmentation:
+  - monai.transforms.LoadImaged:
+      args: []
+      kwargs:
+        keys:
+        - image
+  - monai.transforms.AddChanneld:
+      args: []
+      kwargs:
+        keys:
+        - image
+  - monai.transforms.SpacingD:
+      args: []
+      kwargs:
+        keys:
+        - image
+        mode:
+        - bilinear
+        pixdim:
+        - 1.0
+        - 1.0
+        - 1.0
+  - monai.transforms.NormalizeIntensityd:
+      args: []
+      kwargs:
+        keys:
+        - image
+  - monai.transforms.ToTensorD:
+      args: []
+      kwargs:
+        keys:
+        - image
