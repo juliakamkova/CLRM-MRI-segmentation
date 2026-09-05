@@ -1,5 +1,3 @@
-For working with __GITHUB__ check __github_commands.txt__
-
 # Liver Metastasis MRI Segmentation
 
 Code release accompanying the paper *"Impact of Annotation Style and Dataset Size on CNN-based MRI Segmentation of Colorectal Liver Metastases"*.
